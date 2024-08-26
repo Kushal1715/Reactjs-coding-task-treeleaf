@@ -1,40 +1,65 @@
-import * as React from "react";
+import React from "react";
 import { styled } from "@mui/system";
+import {
+  TablePagination,
+  tablePaginationClasses as classes,
+} from "@mui/base/TablePagination";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-export default function Profiles() {
+export default function PaginationTable({
+  formData,
+  handleDelete,
+  handleEdit,
+}) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = React.useState([]);
+  const deleteItem = (index) => {
+    handleDelete(index);
+  };
 
-  React.useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("formData")) || [];
-    setFormData(data);
-  }, []);
+  const editItem = (index) => {
+    handleEdit(index); // Pass the index of the item to be edited to the parent
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-  const rows = formData.map((data) =>
+  const rows = formData.map((data, index) =>
     createData(
+      index,
       data.name,
       data.email,
       data.phone,
       data.dob,
       data.city,
       data.district,
-      data.country,
       data.province,
-      data.profilePicture
+      data.country,
+      data.profilePicture // Correct field
     )
   );
 
-  rows.sort((a, b) => (a.calories < b.calories ? -1 : 1));
+  // Sort by name (or any other field)
+  rows.sort((a, b) => (a.name < b.name ? -1 : 1));
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
     <>
-      <h1 className="mt-2 text-4xl font-bold mb-4">All Profiles</h1>
-      <Root sx={{ maxWidth: "100%", width: 1300 }}>
+      <h1 className="mt-16 text-4xl font-bold mb-4">Profiles</h1>
+      <Root sx={{ maxWidth: "100%", width: 1300 }} className="scroll-smooth">
         <table aria-label="custom pagination table">
           <thead>
             <tr>
@@ -47,6 +72,7 @@ export default function Profiles() {
               <th>Province</th>
               <th>Country</th>
               <th>Profile</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -54,7 +80,7 @@ export default function Profiles() {
               ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : rows
             ).map((row) => (
-              <tr key={row.phone}>
+              <tr key={row.index}>
                 <td>{row.name}</td>
                 <td style={{ width: 160 }} align="right">
                   {row.email}
@@ -88,6 +114,18 @@ export default function Profiles() {
                     "No image"
                   )}
                 </td>
+                <td style={{ width: 160 }} align="right">
+                  <FaEdit
+                    size={25}
+                    className="cursor-pointer"
+                    onClick={() => editItem(row.index)} // Handle edit
+                  />
+                  <MdDelete
+                    size={25}
+                    className="cursor-pointer"
+                    onClick={() => deleteItem(row.index)} // Handle delete
+                  />
+                </td>
               </tr>
             ))}
             {emptyRows > 0 && (
@@ -96,13 +134,38 @@ export default function Profiles() {
               </tr>
             )}
           </tbody>
+          <tfoot className="pt-4">
+            <tr className="text-[16px]">
+              <CustomTablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={9}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                slotProps={{
+                  select: {
+                    "aria-label": "rows per page",
+                  },
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </tr>
+          </tfoot>
         </table>
       </Root>
+      <button
+        className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-md mt-4 "
+        onClick={() => navigate("/profiles")}
+      >
+        All Profiles
+      </button>
     </>
   );
 }
 
 function createData(
+  index,
   name,
   email,
   phone,
@@ -114,6 +177,7 @@ function createData(
   profile
 ) {
   return {
+    index,
     name,
     email,
     phone,
@@ -160,3 +224,38 @@ const Root = styled("div")(
   }
   `
 );
+
+const CustomTablePagination = styled(TablePagination)`
+  & .${classes.toolbar} {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  & .${classes.selectLabel} {
+    margin: 0;
+  }
+
+  & .${classes.displayedRows} {
+    margin: 0;
+
+    @media (min-width: 768px) {
+      margin-left: auto;
+    }
+  }
+
+  & .${classes.spacer} {
+    display: none;
+  }
+
+  & .${classes.actions} {
+    display: flex;
+    gap: 0.25rem;
+  }
+`;
