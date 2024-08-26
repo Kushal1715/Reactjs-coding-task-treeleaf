@@ -8,7 +8,6 @@ const FormPage = () => {
   const [formData, setFormData] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
-  // Load data from localStorage when the component mounts
   useEffect(() => {
     console.log("Loading data from localStorage");
     const storedData = JSON.parse(localStorage.getItem("formData")) || [];

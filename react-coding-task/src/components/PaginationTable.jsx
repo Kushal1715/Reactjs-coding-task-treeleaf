@@ -22,7 +22,7 @@ export default function PaginationTable({
   };
 
   const editItem = (index) => {
-    handleEdit(index); // Pass the index of the item to be edited to the parent
+    handleEdit(index);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -37,11 +37,10 @@ export default function PaginationTable({
       data.district,
       data.province,
       data.country,
-      data.profilePicture // Correct field
+      data.profilePicture
     )
   );
 
-  // Sort by name (or any other field)
   rows.sort((a, b) => (a.name < b.name ? -1 : 1));
 
   const emptyRows =
@@ -118,12 +117,12 @@ export default function PaginationTable({
                   <FaEdit
                     size={25}
                     className="cursor-pointer"
-                    onClick={() => editItem(row.index)} // Handle edit
+                    onClick={() => editItem(row.index)}
                   />
                   <MdDelete
                     size={25}
                     className="cursor-pointer"
-                    onClick={() => deleteItem(row.index)} // Handle delete
+                    onClick={() => deleteItem(row.index)}
                   />
                 </td>
               </tr>
